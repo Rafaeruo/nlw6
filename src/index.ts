@@ -1,18 +1,24 @@
 import "reflect-metadata";
 import dotenv from "dotenv";
 dotenv.config();
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
+import "express-async-errors";
 
 import "./db";
 import routes from "./routes";
 
 const app = express();
+
 app.use(express.json());
+
 app.use(routes);
 
-app.get("/", (_req, res) => {
-  console.log(process.env.URL);
-  return res.json({ msg: "hello world" });
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  if (err instanceof Error) {
+    return res.status(400).json({ msg: err.message });
+  }
+
+  return res.status(500).json({ msg: "Internal Server Error" });
 });
 
 const port = process.env.PORT || 5000;
